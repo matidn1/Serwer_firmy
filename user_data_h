@@ -1,0 +1,30 @@
+#ifndef _USERDATA_H
+#define _USERDATA_H
+
+#include <iostream>
+#include <string>
+#include <conio.h>
+using namespace std;
+
+// Dane logowania użytkowników. Do zrobienie: przeciążenie operatora porównania, porównanie haseł, odkodowanie hasła, zakodowanie hasła.
+class UserData
+{
+public:
+	UserData(){};
+	UserData(const string, const string, const unsigned short); //Tworzy obiekt zapisując dane do pól. Rozkodowywuje hasło.
+	UserData(const string arg_login):login(arg_login){};
+	unsigned short pos(); //Zwraca id czyli pozycję na jakiej pracuje dana osoba
+	bool comparePasswd(const string&); //porównuje hasła
+	bool operator==(const UserData&);
+	void code();
+	string getLogin();
+	string getPasswd();
+	unsigned short getId();
+	void changePasswd();
+private:
+	string login;
+	string decode();
+	string passwd;
+	unsigned short id;
+};
+#endif // !_USERDATA_H
