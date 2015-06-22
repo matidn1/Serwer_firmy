@@ -1,0 +1,16 @@
+#ifndef _OWNER_H
+#define _OWNER_H
+#include "Labourer.h"
+
+
+class Owner : public Labourer
+{
+public:
+	Owner(const string arg_login, const string arg_name, const string arg_surname, const unsigned int arg_earnings);
+	virtual string task(); //dla właściciela jest to przydzielenie zadania, dla pracownika i kontrolera wykonanie zadania
+	virtual string specialAction(string); //dla kontrolera i pracownika jest to przyjecie zadania, dla kierwonika dodanie pracownika
+	virtual string getData(){return "*";};
+};
+
+
+#endif // !_OWNER_H
