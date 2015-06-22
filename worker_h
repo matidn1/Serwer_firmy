@@ -1,0 +1,19 @@
+#ifndef _WORKER_H
+#define _WORKER_H
+#include "Labourer.h"
+
+class Worker : public Labourer
+{
+public:
+	Worker(const string arg_login):Labourer(arg_login){};
+	Worker(const string arg_login, const string arg_name, const string arg_surname, const unsigned int arg_earnings, const string taskString);
+	virtual string task(); //dla właściciela jest to przydzielenie zadania, dla pracownika i kontrolera wykonanie zadania
+	virtual string specialAction(string);
+	virtual string getData();
+	~Worker();
+private:
+	List<string>* listTask;
+};
+
+
+#endif // !_WORKER_H
