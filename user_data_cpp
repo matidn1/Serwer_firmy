@@ -1,0 +1,172 @@
+#include "UserData.h"
+
+unsigned short UserData::pos()
+{
+	return this->id;
+}
+
+
+UserData::UserData(const string arg_login, const string arg_passwd, const unsigned short arg_secLvl)
+{
+	this->login = arg_login;
+	this->id = arg_secLvl;
+	this->passwd = arg_passwd;
+}
+
+string UserData::decode()
+{
+	string passwdDecoded = this->passwd;
+	for(unsigned int i=0; i<passwdDecoded.length(); i+=2)
+	{
+		if(passwdDecoded[i+1] == NULL)
+			swap(passwdDecoded[i],passwdDecoded[0]);
+		else
+			swap(passwdDecoded[i],passwdDecoded[i+1]);
+	}
+	return passwdDecoded;
+}
+
+void UserData::code()
+{
+	for(unsigned int i=0; i<passwd.length(); i+=2)
+	{
+		if(this->passwd[i+1] == NULL)
+			swap(passwd[i],passwd[1]);
+		else
+			swap(passwd[i],passwd[i+1]);
+	}
+}
+
+bool UserData::comparePasswd(const string& arg_mozeToHaslo)
+{
+	return arg_mozeToHaslo == this->decode();
+}
+
+bool UserData::operator==(const UserData& arg_loginToCompare)
+{
+	return this->login == arg_loginToCompare.login;
+}
+
+string UserData::getLogin()
+{
+	return this->login;
+}
+
+string UserData::getPasswd()
+{
+	return this->passwd;
+}
+
+unsigned short UserData::getId()
+{
+	return this->id;
+}
+
+void UserData::changePasswd()
+{
+	unsigned short attemptNumber=1;
+	string newPasswd, tmp;
+	do
+	{
+		char kod[256], c;
+		string newPasswd = "";
+		int i = 0;
+		cout << "\nPodaj stare haslo: ";
+		while((c = _getch()) != 13) // 13, to kod ENTERA, który koñczy wpisywanie hasła                                                                
+		{
+	        if (c == 8 && i>0) // Jeżeli znakiem jest backspace, usuwa ostatni znak. Oczywiście jeśli jakiś znak jest.
+			{
+				cout << "\b";
+				i--;
+				kod[i] = NULL;
+			}
+			else // Wypisuje na ekran gwiazdkê a znak zamisuje do hasła
+			{
+				cout << "*";
+				kod[i] = c;
+				i++;
+			}
+		}
+		kod[i] = NULL; //Wpisujemy w ostatni znak NULL, żeby string (ten poniżej) wiedział kiedy się kończy.
+		tmp = (string)kod;
+		//Teraz trzeba sprawdzić czy hasło jest poprawne. W tym celu metoda klasy UserData porównująca hasła
+		if (this->comparePasswd(tmp))
+		{
+			attemptNumber = 5; //pêtla pozwala na 3 próby wpisania hasła. Wpisuje 5 żeby było wiadomo, że pętla się skończyła z dobrze wpisanym hasłem
+			break;
+		}
+		else
+			attemptNumber++;
+	} while (attemptNumber <= 3);
+
+	if (attemptNumber != 5)
+		return;
+
+	//=========================================================================================
+	newPasswd = "";
+	{
+		char kod[256], c;
+		int i = 0;
+		cout << "\nPodaj nowe haslo: ";
+		while((c = _getch()) != 13) // 13, to kod ENTERA, który koñczy wpisywanie hasła                                                                
+		{
+	        if (c == 8 && i>0) // Jeśeli znakiem jest backspace, usuwa ostatni znak. Oczywiœcie jeśli jakiś znak jest.
+			{
+				cout << "\b";
+				i--;
+				kod[i] = NULL;
+			}
+			else // Wypisuje na ekran gwiazdkę a znak zamisuje do hasła
+			{
+				cout << "*";
+				kod[i] = c;
+				i++;
+			}
+		}
+		kod[i] = NULL; //Wpisujemy w ostatni znak NULL, żeby string (ten poniźej) wiedział kiedy się kończy.
+		newPasswd = (string)kod;
+	}
+
+	//============================================================================================
+	attemptNumber = 1;
+	do
+	{
+		char kod[256], c;
+		int i = 0;
+		cout << "\nPowtorz nowe haslo: ";
+		while((c = _getch()) != 13) // 13, to kod ENTERA, który koñczy wpisywanie hasła                                                                
+		{
+	        if (c == 8 && i>0) // Je¿eli znakiem jest backspace, usuwa ostatni znak. Oczywiœcie jeśli jakiś znak jest.
+			{
+				cout << "\b";
+				i--;
+				kod[i] = NULL;
+			}
+			else // Wypisuje na ekran gwiazdkê a znak zamisuje do hasła
+			{
+				cout << "*";
+				kod[i] = c;
+				i++;
+			}
+		}
+		kod[i] = NULL; //Wpisujemy w ostatni znak NULL, żeby string (ten poniźej) wiedział kiedy siê kończy.
+		tmp = (string)kod;
+		//Teraz trzeba sprawdzić czy hasło jest poprawne. W tym celu metoda klasy UserData porównująca hasła
+		if (newPasswd == tmp)
+		{
+			attemptNumber = 5; //pętla pozwala na 3 próby wpisania hasła. Wpisuje 5 żeby było wiadomo, że pętla się skończyła z dobrze wpisanym hasłem
+			break;
+		}
+		else
+			attemptNumber++;
+	} while (attemptNumber <= 3);
+
+	if (attemptNumber != 5)
+	{
+		cout << "\nHaslo nie zostalo zmienion!\n";
+		return;
+	}
+	this->passwd = newPasswd;
+	this->code();
+	cout << "\nHaslo zostalo zmienione!\n";
+}
