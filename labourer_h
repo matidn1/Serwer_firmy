@@ -1,0 +1,33 @@
+#ifndef _LABOURER_H
+#define _LABOURER_H
+#include <iostream>
+#include <string>
+#include "List.h"
+#include <conio.h>
+#include <string>
+
+using namespace std;
+
+class Labourer
+{
+public:
+	Labourer(){};
+	Labourer(const string arg_login):login(arg_login){};
+	bool operator==(const Labourer& arg_loginToCompare);
+	void setData(const string arg_login, const string arg_name, const string arg_surname, const unsigned int arg_earnings);
+	Labourer(const string arg_login, const string arg_name, const string arg_surname, const unsigned int arg_earnings):login(arg_login), firstname(arg_name), surname(arg_surname), earnings(arg_earnings){};
+	unsigned int checkEarnings(); //dla pracownika i kontrolera sprawdzenie zarobków, dla właściciel wypisanie, że jego zarobki zależą od tego jak pracownicy pracują
+	virtual string task()=0; //dla właściciela jest to przydzielenie zadania, dla pracownika i kontrolera wykonanie zadania
+	virtual string specialAction(string)=0;
+	virtual string getData()=0;
+	string getName();
+	string getSurname();
+	unsigned int getEarnings();
+public:
+	string login;
+	string firstname;
+	string surname;
+	unsigned int earnings;
+};
+
+#endif // !_LABOURER_H
