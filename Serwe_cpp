@@ -1,0 +1,381 @@
+#include "System.h"
+
+void System::start() //Utworzenie listy z danymi logowania użytkowników
+{
+	listUserData = new List<UserData>;
+	listLabourer = new List <Labourer*>;
+	fileUserData = new fstream("userData.txt");
+	fileLabourer = new fstream("pracownicy.txt");
+	if(!fileUserData->is_open() || !fileLabourer->is_open())
+		return;
+	while(!fileUserData->eof())
+	{
+		string f1_login, f1_passwd, f1_id, f2_name, f2_surname, f2_earnings, f2_tasksString;
+		Labourer* tmp_Labourer = NULL;
+		//ladowanie danych z pliku pierwszego
+		getline(*fileUserData, f1_login);
+		getline(*fileUserData, f1_passwd);
+		getline(*fileUserData, f1_id);
+		UserData tmp_data(f1_login, f1_passwd, atoi(f1_id.c_str()));
+		listUserData->pushBack(tmp_data);
+		//ladowanie danych z pliku drugiego
+		getline(*fileLabourer, f1_login);
+		getline(*fileLabourer, f2_name);
+		getline(*fileLabourer, f2_surname);
+		getline(*fileLabourer, f2_earnings);
+		getline(*fileLabourer,f2_tasksString);
+		switch (atoi(f1_id.c_str()))
+		{
+		case 1:
+			tmp_Labourer = new Owner(f1_login,f2_name,f2_surname,atoi(f2_earnings.c_str()));
+			listLabourer->pushBack(tmp_Labourer);
+			break;
+		case 2:
+			tmp_Labourer = new Controler(f1_login,f2_name,f2_surname,atoi(f2_earnings.c_str()),f2_tasksString);
+			listLabourer->pushBack(tmp_Labourer);
+			break;
+		case 3:
+			tmp_Labourer = new Worker(f1_login,f2_name,f2_surname,atoi(f2_earnings.c_str()),f2_tasksString);
+			listLabourer->pushBack(tmp_Labourer);
+			break;
+		default:
+			break;
+		}
+	}
+	this->logToSys();
+}
+
+void System::logToSys() //Logowanie do systemu. Tu tworzona jet lista pracowników.
+{
+	currentUser = NULL;
+	while(currentUser == NULL)
+	{
+		system ("cls");
+		cout << "Witamy w systemie! Prosze o zalogowanie sie (QUIT - zaniechaj).\nLogin: ";
+		cin >> this->login;
+		if (this->login == "QUIT")
+			return;
+		UserData tmp_UserLogin(this->login); //wpisujemy login do tymczasowego obiektu UserData
+		currentUser = listUserData->findItem(tmp_UserLogin); //szukamy na liście danego loginu. Jeśli znajdziemy zwróci nam wskaźnik na obiekt z tym loginem. Jeœli nie to NULL
+	}
+	{ // W klamrach, żeby skrócić długość życia zmiennej tmp_Labourer
+		Labourer* tmp_Labourer = new Worker(this->login);
+		logged = listLabourer->findItem2(tmp_Labourer);
+	}
+	unsigned short attemptNumber = 1;
+	do
+	{
+		//W tej części kodu pobierane jest hasło. Na miejscu wpisywanych znaków pojawiają się jako gwiazdki.
+		char kod[256], c;
+		string passwd = "";
+		int i = 0;
+		cout << "\nPodaj haslo: ";
+		while((c = _getch()) != 13) // 13, to kod ENTERA, który kończy wpisywanie hasła                                                       
+		{
+	        if (c == 8 && i>0) // Jeżeli znakiem jest backspace, usuwa ostatni znak. Oczywiście jeśli jakiś znak jest.
+			{
+				cout << "\b";
+				i--;
+				kod[i] = NULL;
+			}
+			else // Wypisuje na ekran gwiazdkę a znak zamisuje do hasła
+			{
+				cout << "*";
+				kod[i] = c;
+				i++;
+			}
+		}
+		kod[i] = NULL; //Wpisujemy w ostatni znak NULL, żeby string (ten poniźej) wiedział kiedy się kończy.
+		passwd = (string)kod;
+		//Teraz trzeba sprawdzić czy hasło jest poprawne. W tym celu metoda klasy UserData porównujca hasła
+		if (currentUser->comparePasswd(passwd))
+		{
+			system ("cls");
+			cout << "Zalogowano do systemu. Witaj " << this->login << "!";
+			attemptNumber = 5; //pętla pozwala na 3 próby wpisania hasła. Wpisuje 5 żeby było wiadomo, że pętla się skończyła z dobrze wpisanym hasłem
+			break;
+		}
+		else
+			attemptNumber++;
+	} while (attemptNumber <= 3);
+	if (attemptNumber != 5)
+		return;
+
+
+	//gdzieś tu trzeba wygenerować listę pracowników
+	unsigned short position = currentUser->pos(); //do zmiennej zwraca pozycję naszego urzytkownika
+	switch(position)
+	{
+	case 1:
+		this->menuOwner();
+		break;
+	case 2:
+		this->menuWorker();
+		break;
+	case 3:
+		this->menuWorker();
+		break;
+	}
+
+
+
+	return;
+}
+
+System::~System()
+{
+	fileUserData->close();
+	fileUserData->clear();
+	fileLabourer->close();
+	fileLabourer->clear();
+	fileUserData->open("userData.txt", ios::out | ios::trunc);
+	fileLabourer->open("pracownicy.txt", ios::out | ios::trunc);
+	
+	Labourer* tmpLabourer;
+	UserData tmpUser;
+	bool flag = false;
+	while(!listLabourer->empty())
+	{
+		tmpLabourer = listLabourer->popFront();
+		tmpUser = listUserData->popFront();
+		if (flag)
+		{
+			*fileUserData << endl;
+			*fileLabourer << endl;
+		}
+		*fileUserData << tmpUser.getLogin() << endl
+			<< tmpUser.getPasswd() << endl
+			<< tmpUser.getId();
+		*fileLabourer << tmpUser.getLogin() << endl
+			<< tmpLabourer->getName() << endl
+			<< tmpLabourer->getSurname() << endl
+			<< tmpLabourer->getEarnings() << endl
+			<< tmpLabourer->getData();
+		flag = true;
+	}
+	// zapisywanie do pliku i usuwanie zmiennych
+	fileUserData->flush();
+	fileLabourer->flush();
+	fileUserData->close();
+	fileUserData->clear();
+	fileLabourer->close();
+	fileLabourer->clear();
+	delete listUserData;
+	delete listLabourer;
+	delete fileLabourer;
+	delete fileUserData;
+}
+
+void System::menuOwner()
+{
+	bool flag = true;
+	do
+	{
+		cin.clear();
+		fflush(stdin);
+		system ("cls");
+		cout << "Zalogowano jako " << this->login << ".\n";
+		cout << "1. Sprawdz zarobki.\n"
+			 << "2. Przydziel zadanie.\n"
+			 << "3. Zatrudnij pracownika.\n"
+			 << "4. Zwolnij pracownika.\n"
+			 << "5. Zmien haslo.\n"
+			 << "6. Wyjscie\n";
+		char choice;
+		do
+		{
+			choice = _getch();
+		}
+		while(choice < 49 && choice > 53); //49 to liczba 1 w ascii. 53 to liczba 5 
+
+		Labourer* tmp_Labourer, * tmp_login;
+		Node<UserData>* nodeUser;
+		Node<Labourer*>* nodeLabourer;
+		string login;
+		string tmp;
+		string strArray[6];
+		unsigned int j=0, lastStringPos=0;
+		switch(choice)
+		{
+		case '1':
+			cout << "Twoj dochod to: " << logged->checkEarnings() << "$\n";
+			_getch();
+			break;
+		case '2':
+			cout << "Podaj login pracownika (komenda QUIT przerywa wprowadzanie): ";
+			do
+			{
+				cin >> login;
+				if (login == "QUIT")
+					goto _quit;
+				tmp_Labourer = new Worker(login);
+				tmp_login = listLabourer->findItem2(tmp_Labourer);
+				if(!tmp_login)
+					cout << "Nie znaleziono pracownika o podanej nazwie. Proszę sprobowac ponownie: ";
+				else
+					break;
+			} while(true);
+			delete tmp_Labourer;
+			tmp = logged->task();
+			cout << tmp_login->specialAction(tmp);
+		_quit:	
+			break;
+		case '3':
+			tmp = logged->specialAction("");
+			for(unsigned int i = 0; i < tmp.length(); i++) 
+			{
+				if( tmp[i] == ' ' ) 
+				{
+					strArray[j] = tmp.substr(lastStringPos, i-lastStringPos);
+					lastStringPos=i+1;
+					j++;
+				}
+			}
+			strArray[5] = tmp.substr(lastStringPos,1);
+			if(true)
+			{
+				UserData tmp_user(strArray[3]);
+				UserData* tmp_userlogin = NULL;
+				tmp_userlogin = listUserData->findItem(tmp_user);
+				if(tmp_userlogin != NULL)
+				{
+					cout << "Login jest w uzyciu. Sprobuj ponownie!\n";
+					_getch();
+					break;
+				}
+			}
+			if(true)
+			{
+				UserData tmpUser(strArray[3],strArray[4],atoi(strArray[5].c_str()));
+				tmpUser.code();
+				listUserData->pushBack(tmpUser);
+			}
+			if(strArray[5] == "1")
+			{
+				Labourer* tmpLab = new Owner(strArray[3],strArray[0],strArray[1],atoi(strArray[2].c_str()));
+				listLabourer->pushBack(tmpLab);
+			}
+			if(strArray[5] == "2")
+			{
+				Labourer* tmpLab = new Controler(strArray[3],strArray[0],strArray[1],atoi(strArray[2].c_str()),"");
+				listLabourer->pushBack(tmpLab);
+			}
+			if(strArray[5] == "3")
+			{
+				Labourer* tmpLab = new Worker(strArray[3],strArray[0],strArray[1],atoi(strArray[2].c_str()),"");
+				listLabourer->pushBack(tmpLab);
+			}
+			_getch();
+			break;
+		case '4':
+			cout << "Podaj login pracownika ktorego chcesz usunac (QUIT - zaniechaj): ";
+			tmp_login = NULL;
+			do
+			{
+				cin >> tmp;
+				tmp_Labourer = new Worker(tmp);
+				tmp_login = listLabourer->findItem2(tmp_Labourer);
+				nodeLabourer = listLabourer->findToDelete(tmp_login);
+				UserData tmp_User(tmp);
+				nodeUser = listUserData->findToDelete(tmp_User);
+				if (tmp == "QUIT")
+					goto _koniec;
+				if (!tmp_login)
+					cout << "Taki login nie istnieje. Sprobuj raz jeszcze: ";
+				if (tmp == this->login)
+				{
+					cout << "Jestes tu szefem! Jesli chcesz sie zwolnic zatrudnij nowego szefa i popros o zwolnienie. Podaj inny login: ";
+					tmp_login = NULL;
+				}
+			} while(!tmp_login);
+			listLabourer->remove(nodeLabourer);
+			listUserData->remove(nodeUser);
+			cout << "Pracownik usuniety!\n";
+			_getch();
+			_koniec:
+			break;
+		case '5':
+			currentUser->changePasswd();
+			_getch();
+			break;
+		case '6':
+			return;
+			break;
+		}
+	}while (flag);
+}
+//=============================================================================================================================================
+void System::menuWorker()
+{
+	bool flag = true;
+	do
+	{
+		cin.clear();
+		fflush(stdin);
+		system ("cls");
+		cout << "Zalogowano jako " << this->login << ".\n";
+		cout << "1. Sprawdz zarobki.\n"
+			 << "2. Pobierz zadanie.\n"
+			 << "3. Odejdz z pracy.\n"
+			 << "4. Zmien haslo.\n"
+			 << "5. Wyjscie\n";
+		char choice;
+		do
+		{
+			choice = _getch();
+		}while(choice < 49 && choice > 52); //49 to liczba 1 w ascii. 5w to liczba 4
+
+
+		Labourer* tmp_Labourer, * tmp_login;
+		Node<Labourer*>* nodeLabourer;
+		Node<UserData>* nodeUser;
+		bool flag = false;
+		switch(choice)
+		{
+		case '1':
+			cout << "Twoj dochod to: " << logged->checkEarnings() << "$\n";
+			_getch();
+			break;
+		case '2':
+			cout << "Twoje zadanie na dzis to:\n" 
+				<< logged->task();
+			_getch();
+			break;
+		case '3':
+			cout << "Jestes pewien ze chcesz odejsc z pracy? t/n\n";
+			char choice;
+			do
+			{
+				choice = _getch();
+			} while (choice != 't' && choice != 'n' && choice != 'T' && choice != 'N');
+			if (choice == 't' || choice == 'T')
+				flag = true;
+			cout << "Potwierdz? t/n\n";
+			do
+			{
+				choice = _getch();
+			} while (choice != 't' && choice != 'n' && choice != 'T' && choice != 'N');
+			if (choice == 't' || choice == 'T')
+				flag = true;
+			if (flag)
+			{
+				tmp_Labourer = new Worker(login);
+				tmp_login = listLabourer->findItem2(tmp_Labourer);
+				nodeLabourer = listLabourer->findToDelete(tmp_login);
+				UserData tmp_User(login);
+				nodeUser = listUserData->findToDelete(tmp_User);
+				listLabourer->remove(nodeLabourer);
+				listUserData->remove(nodeUser);
+				return;
+			}
+			break;
+		case '4':
+			currentUser->changePasswd();
+			_getch();
+			break;
+		case '5':
+			return;
+			break;
+		}
+	}while (flag);
+}
