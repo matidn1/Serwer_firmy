@@ -1,0 +1,35 @@
+#include "Labourer.h"
+
+unsigned int Labourer::checkEarnings() //dla pracownika i kontrolera sprawdzenie zarobków, dla właściciel wypisanie, że jego zarobki zależą od tego jak pracownicy wykonują swoją pracę
+{
+	return this->earnings;
+}
+
+void Labourer::setData(const string arg_login, const string arg_name, const string arg_surname, const unsigned int arg_earnings)
+{
+	this->login = arg_login;
+	this->earnings = arg_earnings;
+	this->firstname = arg_name;
+	this->surname = arg_surname;
+
+}
+
+bool Labourer::operator==(const Labourer& arg_loginToCompare)
+{
+	return this->login == arg_loginToCompare.login;
+}
+
+string Labourer::getName()
+{
+	return this->firstname;
+}
+
+string Labourer::getSurname()
+{
+	return this->surname;
+}
+
+unsigned int Labourer::getEarnings()
+{
+	return this->earnings;
+}
