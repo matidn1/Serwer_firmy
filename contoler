@@ -1,0 +1,12 @@
+#ifndef _CONTROLER_H
+#define _CONTROLER_H
+#include "Worker.h"
+
+class Controler : public Worker
+{
+public:
+	Controler(const string arg_login, const string arg_name, const string arg_surname, const unsigned int arg_earnings, const string taskString):Worker(arg_login,arg_name,arg_surname,arg_earnings,taskString){};
+};
+
+
+#endif // !_CONTROLER_H
