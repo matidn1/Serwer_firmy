@@ -1,0 +1,12 @@
+#include <cstdlib>
+#include <string>
+#include "System.h"
+
+
+int main()
+{
+	System* obiekt = new System();
+	obiekt->start();
+	delete obiekt;
+	getchar();
+}
