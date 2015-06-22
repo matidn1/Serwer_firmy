@@ -1,0 +1,283 @@
+// Lista jednostronnie wiązana na szablonach
+
+#ifndef _LIST_H
+#define _LIST_H
+#include <iostream>
+
+template<class newType> class Node;
+
+// Lista jednostronnie wizana
+template<class newType> class List
+{
+public:
+	void pushBack(const newType&); //Dodanie danych na koniec listy
+	void pushFront(const newType&); //Dodanie danych na początek listy
+	newType popBack(); //Zdjęcie danych z koca listy. Wymaga TryCatch
+	newType popFront(); //Zdjęcie danych z początku listy. Wymaga TryCatch
+	newType getNext(); //Do wyciągania po kolei danych z listy
+	void resetCurrent(); //Ustawia wskaźnik current na NULLa dzięki czemu możemy od nowa jechać getNextem
+	void remove(Node<newType>*); //Usuwa elemnt równy podanemu
+	newType* findItem(const newType&); //Zwraca węzełek. 
+	newType findItem2(const newType&); //Zwraca węzełek. 
+	Node<newType>* findToDelete(const newType&);
+	bool empty(); //Czy pusta?
+	//Konstruktory i destruktory:
+
+	List(); // Konstruktor domniemany. Zeruje głowę i ogon listy
+	List(const newType&); //Konstruktor dodający pierwszy element
+	~List();
+private:
+	Node<newType>* current; //kursor
+	Node<newType>* head; //początek listy
+	Node<newType>* tail; //koniec listy
+	unsigned int listSize; //liczba węzłów listy
+};
+
+
+
+template<class newType> void List<newType>::remove(Node<newType>* arg_node)
+{
+	if (head == NULL)
+		return;
+	if (head == tail)
+	{
+		delete head;
+		head = NULL;
+		tail = NULL;
+		return;
+	}
+	if (head == arg_node)
+	{
+		head = head->next;
+		delete arg_node;
+		return;
+	}
+	Node<newType>* tmpNode = head;
+	while(tmpNode->next != NULL)
+	{
+		if(tmpNode->next == arg_node)
+		{
+			tmpNode->next = arg_node->next;
+			if (arg_node == tail)
+				tail = tmpNode;
+			delete arg_node;
+			return;
+		}
+		tmpNode = tmpNode->next;
+	}
+	return;
+}
+
+template<class newType> void List<newType>::resetCurrent()
+{
+	current = head;
+}
+
+template<class newType> newType List<newType>::getNext()
+{
+	if (head == NULL)
+		return NULL;
+	else
+	{
+		newType tmp_data = current->data;
+		current = current->next;
+		return tmp_data;
+	}
+}
+
+template<class newType> List<newType>::List()
+{
+	head = NULL;
+	tail = NULL;
+	current = NULL;
+	listSize = 0;
+}
+
+template<class newType> List<newType>::List(const newType& arg_data)
+{
+	head = new Node<newType>;
+	head->data = arg_data;
+	head->next = NULL;
+	tail = head;
+	listSize = 1;
+}
+
+template<class newType> List<newType>::~List()
+{
+	if(head != NULL)
+	{
+		Node<newType>* mobileNode = head; //tymczasowa zmienna do przesówania węzła
+		while (mobileNode->next != NULL)
+		{
+			head = head->next;
+			delete mobileNode;
+			mobileNode = head;
+		}
+		delete head;
+	}
+}
+
+template<class newType> void List<newType>::pushBack(const newType& arg_data)
+{
+	if(head == NULL)
+	{
+		head = tail = new Node<newType>(arg_data);
+		listSize++;
+	}
+	else
+	{
+		tail->next = new Node<newType>(arg_data);
+		tail = tail->next;
+		listSize++;
+	}
+}
+
+template<class newType> void List<newType>::pushFront(const newType& arg_data)
+{
+	if(head == NULL)
+	{
+		head = tail = new Node<newType>(arg_data);
+		listSize++;
+	}
+	else
+	{
+		head = new Node<newType>(arg_data, head);
+		listSize++;
+	}
+}
+
+template<class newType> newType List<newType>::popBack() //trzeba coś zwrócić!!!!!!!!!!!!!!
+{
+	if (head == NULL)
+	{
+		std::string exception = "Lista jest pusta!\n";
+		throw exception;
+	}
+	else
+	{
+		Node<newType>* tmp_node = head;
+		if (head->next == tail)
+		{
+			tail = head;
+			newType tmp_data = head->next->data;
+			delete head->next;
+			head->next = NULL;
+			listSize--;
+			return tmp_data;
+		}
+		while(tmp_node->next->next)
+		{
+			tmp_node = tmp_node->next;
+		}
+		newType tmp_data = tail->data;
+		delete tail;
+		tmp_node->next = NULL;
+		listSize--;
+		tail = tmp_node;
+		return tmp_data;
+	}
+}
+
+template<class newType> newType List<newType>::popFront() //trzeba coś zwrócić!!!!!!!!!!!!!!
+{
+	if (head == NULL)
+	{
+		std::string exception = "Lista jest pusta!\n";
+		throw exception;
+	}
+	else
+	{
+		newType tmp_data = head->data;
+		Node<newType>* tmp_node = head;
+		head = head->next;
+		if (tail == tmp_node)
+			tail = NULL;
+		delete tmp_node;
+		listSize--;
+		return tmp_data;
+	}
+}
+
+template<class newType> bool List<newType>::empty()
+{
+	if (head == NULL)
+		return true;
+	else
+		return false;
+}
+
+template<class newType> newType* List<newType>::findItem(const newType& arg_key)
+{
+	if (head == NULL)
+	{
+		return NULL;
+	}
+	else
+	{
+		Node<newType>* tmp_node = head;
+		while (tmp_node)
+		{
+			if (tmp_node->data == arg_key)
+				return &tmp_node->data;
+			tmp_node = tmp_node->next;
+		}
+		return NULL;
+	}
+}
+
+template<class newType> Node<newType>* List<newType>::findToDelete(const newType& arg_key)
+{
+	if (head == NULL)
+	{
+		return NULL;
+	}
+	else
+	{
+		Node<newType>* tmp_node = head;
+		while (tmp_node)
+		{
+			if (tmp_node->data == arg_key)
+				return tmp_node;
+			tmp_node = tmp_node->next;
+		}
+		return NULL;
+	}
+}
+
+template<class newType> newType List<newType>::findItem2(const newType& arg_key)
+{
+	if (head == NULL)
+	{
+		return NULL;
+	}
+	else
+	{
+		Node<newType>* tmp_node = head;
+		while (tmp_node)
+		{
+			if (tmp_node->data->login == arg_key->login)
+				return tmp_node->data;
+			tmp_node = tmp_node->next;
+		}
+		return NULL;
+	}
+}
+
+//*******************************************************************************
+
+// Węzeł listy
+template<class newType> class Node
+{
+private:
+	friend class List<newType>;
+	// dane przechowywane w liście
+	newType data;
+	// kolejny węzeł listy
+	Node* next;
+public:
+	//konstruktor przyjmujący dane do wpisania i wskanik. Jeżeli wskaźnik nie podany wpisuje wartość NULL
+	Node(newType arg_data, Node* arg_pointer = NULL):data(arg_data), next(arg_pointer){};
+	Node(){};
+};
+
+#endif // _LIST_H
