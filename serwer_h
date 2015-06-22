@@ -1,0 +1,35 @@
+#ifndef _SYSTEM_H
+#define _SYSTEM_H
+
+#include <fstream>
+#include "Controler.h"
+#include "Owner.h"
+#include "Worker.h"
+#include "List.h"
+#include "UserData.h"
+#include <cstdlib>
+
+//Zadania do wykonania:
+//Logowanie, tworzenie nowego użytkownika, 
+
+class System
+{
+public:
+	void start(); //inicjalizacja programu
+	~System();
+private:
+	void changePasswd(); //zmiana hasla uzytkownika
+	void logToSys(); //logowanie do systemu
+	void menuOwner();
+	void menuWorker();
+private:
+	fstream* fileUserData; //plik z lista uzytkownikow, haslami i typami kont
+	fstream* fileLabourer;
+	string login; //login urzytkownika
+	UserData* currentUser;
+	Labourer* logged;
+	List<UserData>* listUserData; //Lista danych logowania użytkowników
+	List<Labourer*>* listLabourer;
+};
+
+#endif //_SYSTEM_H
