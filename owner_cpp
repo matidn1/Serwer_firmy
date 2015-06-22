@@ -1,0 +1,109 @@
+#include "Owner.h"
+
+string wprowadzZadanie()
+{
+	//char tmp_char[256];
+	string test = "";
+	system ("cls");
+	cout << "Wprowadz zadanie, ktore ma wykonac pracownik:\n";
+	cin.clear();
+	do
+	{
+		getline(cin,test);
+	}while (test.empty());
+	cout << "Wprowadzone zadnaie: " << test;
+	cin.clear();
+	return test;
+}
+
+
+string Owner::task()
+{
+	bool flag = false;
+	char choice;
+	string task;
+	do
+	{
+		task = wprowadzZadanie();
+		cout << "\nCzy zatwierdzic? t/n\n";
+		fflush(stdin);
+		do
+		{
+			choice = _getch();
+		} while (choice != 't' && choice != 'n' && choice != 'T' && choice != 'N');
+		if (choice == 't' || choice == 'T')
+			flag = true;
+	} while(!flag);
+	for (unsigned int i=0; i<task.length(); i++)
+	{
+		if(task[i] == ' ')
+			task[i] = '_';
+	}
+	return task;
+}
+
+string Owner::specialAction(string data="")
+{
+	string name,surname,earnings,id,login,passwd;
+	bool flag = true;
+	do
+	{
+		system ("cls");
+		cout << "Wprowadz imie pracownika:\n";
+		getline(cin,name);
+		cout << "Wprowadz nazwisko pracownika:\n";
+		getline(cin,surname);
+		do
+		{
+			cout << "Wprowadz login pracownika (nie mozna urzyc slowa kluczowego QUIT):\n";
+			getline(cin,login);
+		} while (login == "QUIT");
+		cout << "Wprowadz haslo pracownika:\n";
+		getline(cin,passwd);
+		cout << "Wprowadz zarobki pracownika:\n";
+		getline(cin,earnings);
+		do
+		{
+			flag = true;
+			for (unsigned int i=0; i<earnings.length(); i++)
+			{
+				int ascii = earnings[i];
+				if(ascii < 48 || ascii > 57) // kod ascii 0 do 9 48-57
+				{
+					flag = false;
+					break;
+				}
+			}
+			if (!flag)
+			{
+				cout << "Wprowadzone dane nie sa liczba. Prosze wprowadzic poprawne dane:\n";
+				getline(cin,earnings);
+			}
+		}while(!flag);
+
+		cout << "Wprowadz kod stanowiska: 1,2 lub 3:\n";
+		getline(cin,id);
+		while(id != "1" && id != "2" && id != "3")
+		{
+			cout << "Wprowadzone dane nie sa kodem stanowiska. Prosze wprowadzic poprawne dane:\n";
+			getline(cin,id);
+		} 
+		flag = false;
+		cout << "Wprowadzone dane: " << name+" "+surname+" "+earnings+" "+login+" "+passwd+" "+id
+			 << "\nCzy zatwierdzic? t/n\n";
+		char choice;
+		do
+		{
+			choice = _getch();
+		} while (choice != 't' && choice != 'n' && choice != 'T' && choice != 'N');
+		if (choice == 't' || choice == 'T')
+			flag = true;
+	} while(!flag);
+	
+	return name+" "+surname+" "+earnings+" "+login+" "+passwd+" "+id;
+}
+
+Owner::Owner(const string arg_login, const string arg_name, const string arg_surname, const unsigned int arg_earnings)
+{
+	this->setData(arg_login,arg_name,arg_surname,arg_earnings);
+}
