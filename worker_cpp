@@ -1,0 +1,57 @@
+#include "Worker.h"
+
+string Worker::task()
+{
+	string task;
+	try
+	{
+		task = listTask->popFront();
+	}
+	catch(string exc)
+	{
+		return "Brak zadan!\n";
+	}
+	return task;
+}
+
+string Worker::specialAction(string newTask)
+{
+	listTask->pushBack(newTask);
+	return "Zadanie dodano pomyslnie!\n";
+}
+
+Worker::Worker(const string arg_login, const string arg_name, const string arg_surname, const unsigned int arg_earnings, const string taskString)
+{
+	listTask = new List<string>;
+	this->setData(arg_login, arg_name, arg_surname, arg_earnings);
+	unsigned int lastStringPos = 0;
+	if (taskString != "")
+	{
+		for(unsigned int i = 0; i < taskString.length(); i++ ) 
+		{
+			if( taskString[i] == ' ' ) 
+			{
+				listTask->pushBack(taskString.substr( lastStringPos, i-lastStringPos));
+				lastStringPos=i+1;
+			}
+		}
+	}
+}
+
+Worker::~Worker()
+{
+	delete listTask;
+}
+
+string Worker::getData()
+{
+	string tmp = "";
+	while (!listTask->empty())
+	{
+		tmp += listTask->popFront();
+		tmp += " ";
+	}
+	if (tmp == "")
+		return "*";
+	return tmp;
+}
